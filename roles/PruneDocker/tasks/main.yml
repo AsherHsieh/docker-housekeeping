@@ -1,0 +1,65 @@
+---
+###############################################################################
+#
+# Prune Stopped Docker Container
+#
+###############################################################################
+
+# Prune Stopped Docker Container
+- debug:
+    msg: "Check Docker Name format"
+
+# Copy the record file if exists
+- name: copy local record file to remote if exists
+  local_action: stat path="./backup/{{ ansible_hostname }}/tmp/PurgeDockerNameRecord.txt"
+  register: result
+- copy: 
+    src: ./backup/{{ ansible_hostname }}/tmp/PurgeDockerNameRecord.txt
+    dest: /tmp/PurgeDockerNameRecord.txt
+  when: result is success
+  ignore_errors: True
+
+# copy the purge_container.py file to host
+- name: copy the purge_container.py
+  copy:
+    src: ./files/purge_container.py
+    dest: /tmp/purge_container.py
+    owner: developer
+    group: developer
+    mode: 0644
+
+# implement purge_container.py
+- name: implement purge_container.py
+  shell: "python /tmp/purge_container.py"
+
+# delete the purge_container.py
+- name: delete the purge_container.py
+  file:
+    path: /tmp/purge_container.py
+    state: absent
+
+# Back up the original /tmp/PurgeDockerNameRecord.txt
+- name: Back up /tmp/PurgeDockerNameRecord.txt
+  fetch:
+    dest: ./backup/
+    src: /tmp/PurgeDockerNameRecord.txt
+
+# delete the /tmp/CompareDockerNameRecord.txt
+- name: delete the /tmp/PurgeDockerNameRecord.txt
+  file:
+    path: /tmp/PurgeDockerNameRecord.txt
+    state: absent
+
+# Back up the original /tmp/Over3MonthsDockerDeleteRecord.txt
+- name: Back up /tmp/Over3MonthsDockerDeleteRecord.txt
+  fetch:
+    dest: ./backup/
+    src: /tmp/Over3MonthsDockerDeleteRecord-{{ ansible_date_time.date }}.txt
+  ignore_errors: True
+
+# delete the /tmp/Over3MonthsDockerDeleteRecord.txt
+- name: delete the /tmp/Over3MonthsDockerDeleteRecord.txt
+  file:
+    path: /tmp/Over3MonthsDockerDeleteRecord-{{ ansible_date_time.date }}.txt
+    state: absent
+  ignore_errors: True

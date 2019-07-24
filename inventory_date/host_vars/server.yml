@@ -1,0 +1,5 @@
+---
+# Define how many roles need to be implemented
+
+CheckDockerNameEnabled: true
+PruneDockerEnabled: true

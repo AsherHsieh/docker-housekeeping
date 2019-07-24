@@ -1,0 +1,8 @@
+---
+- hosts: all
+  become: yes
+  roles:
+    - role: CheckDockerName
+      when: CheckDockerNameEnabled|bool
+    - role: PruneDocker
+      when: PruneDockerEnabled|bool

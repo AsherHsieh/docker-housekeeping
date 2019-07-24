@@ -1,0 +1,65 @@
+---
+###############################################################################
+#
+# Check Docker Name format
+#
+###############################################################################
+
+# Check Docker Name format
+- debug:
+    msg: "Check Docker Name format"
+
+# Copy the record file if exists
+- name: copy local record file to remote if exists
+  local_action: stat path="./backup/{{ ansible_hostname }}/tmp/CompareDockerNameRecord.txt"
+  register: result
+- copy: 
+    src: ./backup/{{ ansible_hostname }}/tmp/CompareDockerNameRecord.txt
+    dest: /tmp/CompareDockerNameRecord.txt
+  when: result is success
+  ignore_errors: True
+
+# copy the check_container.py file to host
+- name: copy the check_container.py
+  copy:
+    src: ./files/check_container.py
+    dest: /tmp/check_container.py
+    owner: developer
+    group: developer
+    mode: 0644
+
+# implement check_container.py
+- name: implement check_container.py
+  shell: "python /tmp/check_container.py"
+
+# delete the check_container.py
+- name: delete the check_container.py
+  file:
+    path: /tmp/check_container.py
+    state: absent
+
+# Back up the original /tmp/CompareDockerNameRecord.txt
+- name: Back up /tmp/CompareDockerNameRecord.txt
+  fetch:
+    dest: ./backup/
+    src: /tmp/CompareDockerNameRecord.txt
+
+# delete the /tmp/CompareDockerNameRecord.txt
+- name: delete the /tmp/CompareDockerNameRecord.txt
+  file:
+    path: /tmp/CompareDockerNameRecord.txt
+    state: absent
+
+# Back up the original /tmp/DockerDeleteRecord.txt
+- name: Back up /tmp/DockerDeleteRecord.txt
+  fetch:
+    dest: ./backup/
+    src: /tmp/DockerDeleteRecord-{{ ansible_date_time.date }}.txt
+  ignore_errors: True
+
+# delete the /tmp/DockerDeleteRecord.txt
+- name: delete the /tmp/DockerDeleteRecord.txt
+  file:
+    path: /tmp/DockerDeleteRecord-{{ ansible_date_time.date }}.txt
+    state: absent
+  ignore_errors: True

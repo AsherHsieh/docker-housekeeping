@@ -1,0 +1,4 @@
+#!/bin/sh
+00 17 * * * /bin/bash /ailab/docker_purge.sh
+05 17 * * * /ailab/sendmail.py
+05 17 * * * /ailab/sendpurgemail.py

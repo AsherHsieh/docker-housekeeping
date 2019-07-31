@@ -14,10 +14,16 @@
   local_action: stat path="./backup/{{ ansible_hostname }}/tmp/CompareDockerNameRecord.txt"
   register: result
 - copy: 
-    src: ./backup/{{ ansible_hostname }}/tmp/CompareDockerNameRecord.txt
+    src: /ailab/log/{{ ansible_hostname }}/tmp/CompareDockerNameRecord.txt
     dest: /tmp/CompareDockerNameRecord.txt
   when: result is success
   ignore_errors: True
+
+# copy the configs file to host
+- name: copy the configs
+  copy:
+    src: /ailab/configs
+    dest: /tmp/configs
 
 # copy the check_container.py file to host
 - name: copy the check_container.py
@@ -41,7 +47,7 @@
 # Back up the original /tmp/CompareDockerNameRecord.txt
 - name: Back up /tmp/CompareDockerNameRecord.txt
   fetch:
-    dest: ./backup/
+    dest: /ailab/log/
     src: /tmp/CompareDockerNameRecord.txt
 
 # delete the /tmp/CompareDockerNameRecord.txt
@@ -53,7 +59,7 @@
 # Back up the original /tmp/DockerDeleteRecord.txt
 - name: Back up /tmp/DockerDeleteRecord.txt
   fetch:
-    dest: ./backup/
+    dest: /ailab/log/
     src: /tmp/DockerDeleteRecord-{{ ansible_date_time.date }}.txt
   ignore_errors: True
 
@@ -63,3 +69,9 @@
     path: /tmp/DockerDeleteRecord-{{ ansible_date_time.date }}.txt
     state: absent
   ignore_errors: True
+
+# delete the /tmp/configs
+- name: delete the /tmp/configs
+  file:
+    path: /tmp/configs
+    state: absent
